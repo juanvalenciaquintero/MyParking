@@ -19,6 +19,10 @@ console.log(alturaPantalla);
 var anchuraPantalla ;
 console.log(anchuraPantalla);
 
+var arraySitios = new Array() ;
+
+var arraySitiosGuardados = [];
+
 window.onload = function() {
 
 
@@ -26,6 +30,13 @@ window.onload = function() {
 	if (!navigator.geolocation) {
 		alert('Este dispositivo no soporta geolocalizacion');
 	} else {
+
+		if (!localStorage.colorTema) {
+			localStorage.colorTema = 'Azul';
+		}
+
+		var tema = localStorage.colorTema;
+		cambiarTema(tema);
 		
 		var divContenedor = document.querySelector('#contenedor');
 		anchuraPantalla= parseInt(getStyle(divContenedor,'width'))-20;
@@ -48,12 +59,25 @@ window.onload = function() {
 
 		var opcion1Menu = document.querySelector('#menu li:first-of-type').addEventListener('click', aparcar, false);
 
-		var opcion2Menu = document.querySelector('#menu li:nth-of-type(2)').addEventListener('click', mostrar, false);
+		var opcion2Menu = document.querySelector('#menu li:nth-of-type(2)').addEventListener('click', function() {
+				var puntoAmostrar ;
+				if ((typeof(localStorage.aparcamiento)=='undefined') || (localStorage.aparcamiento=="")) {
+					alert('No hay ningún coche aparcado');
+				} else {
+					puntoAmostrar= JSON.parse(localStorage.aparcamiento);
+					console.log(typeof(localStorage.aparcamiento));
+					mostrar('Mi coche',puntoAmostrar);
+				};
+
+				}, false);
 
 		var opcion3Menu = document.querySelector('#menu li:nth-of-type(3)').addEventListener('click', encontrar, false);
 
 		var submenu1 =document.querySelector('#submenu1');
 		submenu1.style.display='none';
+
+		var submenu2 = document.querySelector('#submenu2');
+		var submenu2opciones = document.querySelector('#submenu2 ul');
 
 		var opcion4Menu = document.querySelector('#menu li:nth-of-type(4)').addEventListener('click', function() {
 				
@@ -64,41 +88,92 @@ window.onload = function() {
 					submenu1.style.display = 'none';
 				}
 			}, false);
+
+		var opcion5Menu = document.querySelector('#menu li:nth-of-type(5)').addEventListener('click', function() {
+				
+				
+				if (submenu2.style.display =='none') {
+					submenu2.style.display = 'block';
+				} else{
+					submenu2.style.display = 'none';
+				}
+			}, false);
+
+		
 		
 
 		var botonHamburguesa = document.querySelector('#hamburguesa').addEventListener('click', function(){
 				if (divMenu.style.right!='0px'){
 					divMenu.style.right='0px';
-					document.querySelector('#submenu1').style.display='none';
-					document.querySelector('#submenu2').style.display='none';
+					submenu1.style.display='none';
+					submenu2.style.display='none';
 					
 				} else {
 					divMenu.style.right='-' + (anchuraPantalla + 20)+ 'px';
-					document.querySelector('#submenu1').style.display='none';
-					document.querySelector('#submenu2').style.display='none';
 					
 				}
-		},false);		
+		},false);	
+
+
 
 		var botonAparcar = document.querySelector('#contenedor>button:first-of-type').addEventListener('click', aparcar,false);
 
-		var botonMostrar = document.querySelector('#contenedor>button:nth-of-type(2)').addEventListener('click', mostrar, false);
+	
+		var botonEncontrar = document.querySelector('#contenedor>button:last-of-type').addEventListener('click', function() {
+				var puntoAmostrar ;
+				if ((typeof(localStorage.aparcamiento)=='undefined') || (localStorage.aparcamiento=="")) {
+					alert('No hay ningún coche aparcado');
+				} else {
+					puntoAmostrar= JSON.parse(localStorage.aparcamiento);
+					console.log(typeof(localStorage.aparcamiento));
+					mostrar('Mi coche',puntoAmostrar);
+				};
 
-		var botonEncontrar = document.querySelector('#contenedor>button:last-of-type').addEventListener('click', encontrar, false);
+				}, false);
 
-		var botonMostrarPosicion = document.querySelector('#mensaje button:first-of-type').addEventListener('click',mostrar,false);
+		var botonMostrarPosicion = document.querySelector('#mensaje button:first-of-type').addEventListener('click',function() {
+				var puntoAmostrar ;
+				if ((typeof(localStorage.aparcamiento)=='undefined')) {
+					alert('No hay ningún coche aparcado');
+				} else {
+					puntoAmostrar= JSON.parse(localStorage.aparcamiento);
+					console.log(typeof(localStorage.aparcamiento));
+					mostrar('Mi coche',puntoAmostrar);
+				};
+
+				},false);
 
 		var botonCerrarMensaje=document.querySelector('#mensaje button:last-of-type').addEventListener('click',cerrarMensaje,false);
 
+
+
 		var botonCerrar = document.querySelector('#envolturaMapa button');
 		botonCerrar.addEventListener('click', cerrar,false);
+
+		var botonBorrar = document.querySelector('#envolturaMapa>div>button:last-of-type');
+		botonBorrar.addEventListener('click', borrar,false);
 
 		var botonAceptarMarcador = document.querySelector('#ponerMarcador button:first-child').addEventListener('click', grabarMarcador,false);
 
 		var botonCancelarMarcador = document.querySelector('#ponerMarcador button:last-child').addEventListener('click', cerrarMarcador,false);
 
 		
-		var arraySitios;
+		var arrayOpciones2 = document.querySelectorAll('#subSubmenu2>li>span');
+	
+		for (i=0;i<arrayOpciones2.length;i++) {
+			
+			arrayOpciones2[i].addEventListener('click',function(){
+				var elementoPulsado = this.innerHTML;	
+				
+				cambiarTema(elementoPulsado);
+			}, false);
+		}
+
+		
+		//localStorage.misSitios="";
+		//arraySitiosGuardados="";
+		rellenarSubmenu();
+		
 
 
 
@@ -124,6 +199,17 @@ function encontrar() {
 }
 
 function cerrar() {
+
+	var divEnvolturaMapa = document.querySelector('#envolturaMapa');
+
+	divEnvolturaMapa.style.display='none';
+
+}
+
+function borrar() {
+	
+
+	localStorage.aparcamiento = "";
 
 	var divEnvolturaMapa = document.querySelector('#envolturaMapa');
 
@@ -300,12 +386,59 @@ function fencontrar(sitio) {
 
 }
 
-function ponerMarcador(punto) {
+function rellenarSubmenu() {
+
+	if ((typeof(localStorage.misSitios)!='undefined') && (localStorage.misSitios!="")) {
+		arraySitiosGuardados=JSON.parse(localStorage.misSitios);
+		console.log('Array: ' + arraySitiosGuardados);
+		console.log('Mis sitios: ' + localStorage.misSitios);
+		console.log(JSON.parse(localStorage.misSitios));
+		
+		
+		console.log(arraySitiosGuardados);
+
+		var texto = new Array;
+	
+		var submenu1 = document.querySelector('#submenu1');
+		submenu1.innerHTML="";
+		texto= Object.keys(arraySitiosGuardados);
+		console.log('Nombre de la clave: ' + arraySitiosGuardados[0]);
+		for (j=0;j<arraySitiosGuardados.length;j++){
+			for (i in arraySitiosGuardados[j]){
+
+				texto= Object.keys(arraySitiosGuardados[j][i]);
+				console.log('i='+i+', Nombre sitio: ' + texto);
+				submenu1.innerHTML = submenu1.innerHTML + '<li><span>'+i+'</span></li>';
+
+
+			}
+
+		}
+
+		arraySitios = document.querySelectorAll('#submenu1>li>span');
+
+		for (i=0; i<arraySitios.length; i++) {
+			var encontrado=false;
+			arraySitios[i].addEventListener('click', function() {
+				var elementoPulsado = this.innerHTML;
+				var k=0;	
+				for (k=0;k<arraySitiosGuardados.length;k++){
+				
+					if (arraySitiosGuardados[k][elementoPulsado]) {
+						
+						
+						mostrarPunto(elementoPulsado,arraySitiosGuardados[k][elementoPulsado]);
+					} 
+				}
+				
+			},false);
+		}
+	}
+
 	
 	
-
-
-
+	
+	
 }
 
 function cerrarMarcador() {
@@ -316,7 +449,7 @@ function cerrarMarcador() {
 function abrirVentanaGrabar(objeto) {
 	var ventanaNuevoMarcador = document.querySelector('#ponerMarcador');
 	ventanaNuevoMarcador.style.display='flex';
-
+	document.querySelector('#ponerMarcador>input').focus();
 	localStorage.puntoAgrabar = JSON.stringify(objeto);
 }
 
@@ -354,20 +487,31 @@ function grabarMarcador(objeto) {
 			horizontalAlign:'right'
 		})
 
-	localStorage.setItem(texto,JSON.stringify(nuevoPunto));
+	
 
-	arraySitios = document.querySelectorAll('#submenu1>li>span');
-	for (i=0; i<arraySitios.length; i++) {
-		arraySitios[i].addEventListener('click', function() {
-			var elementoPulsado = this.innerHTML;			
-			mostrarPunto(elementoPulsado,localStorage.getItem(elementoPulsado));
-		},false);
-	}
+	
 
+
+	console.log('Nuevo punto: ' + JSON.stringify(nuevoPunto));
+
+	var textoAgrabar="";
+	console.log('Longitud array: ' + arraySitiosGuardados.length);
+
+	
+	textoAgrabar = '{"' + texto + '":' + JSON.stringify(nuevoPunto) + '}';
+
+	
+	console.log('LocalStorage grabado: ' + localStorage.misSitios);
+
+	arraySitiosGuardados.push(JSON.parse(textoAgrabar));
+	localStorage.misSitios = JSON.stringify(arraySitiosGuardados);
+
+	console.log(localStorage.misSitios);
 	var ventanaNuevoMarcador = document.querySelector('#ponerMarcador');
 	ventanaNuevoMarcador.style.display='none';
 
-
+	
+	rellenarSubmenu();
 
 
 }
@@ -381,8 +525,8 @@ var divMenu = document.querySelector('#menu');
 	} 
 
 	document.querySelector('#mensaje').style.display='none';
-
-	var puntoAmostrar = JSON.parse(punto);
+	console.log(punto);
+	var puntoAmostrar = punto;
 	console.log(puntoAmostrar);
 	var divEnvolturaMapa = document.querySelector('#envolturaMapa');
 
@@ -390,16 +534,16 @@ var divMenu = document.querySelector('#menu');
 
 	var mapa = new GMaps({
 			el:'#contenidoMapa',
-			lat:puntoAmostrar.latLng.lat,
-			lng:puntoAmostrar.latLng.lng,
+			lat:punto.latLng.lat,
+			lng:punto.latLng.lng,
 			zoom:15
 			
 
 		});
 
 		mapa.addMarker({
-			lat:puntoAmostrar.latLng.lat,
-			lng:puntoAmostrar.latLng.lng,
+			lat:punto.latLng.lat,
+			lng:punto.latLng.lng,
 			title:titulo,			
 			infoWindow :{
 				content:titulo
@@ -411,8 +555,8 @@ var divMenu = document.querySelector('#menu');
 		var contenido = "<div class='iconito'>" + titulo + "</div>" ;
 
 		mapa.drawOverlay({
-			lat:puntoAmostrar.latLng.lat,
-			lng:puntoAmostrar.latLng.lng,
+			lat:punto.latLng.lat,
+			lng:punto.latLng.lng,
 			content:contenido,
 			verticalAlign:'bottom',
 			horizontalAlign:'right'
@@ -420,6 +564,93 @@ var divMenu = document.querySelector('#menu');
 
 	
 
+
+}
+
+
+function cambiarTema(elemento) {
+
+	
+	switch (elemento) {
+			case 'Azul' : document.querySelector('body').style.backgroundColor = 'rgba(3,12,99,1)';
+						  document.querySelector('#mensaje').style.borderColor = 'rgba(3,12,99,1)';
+						  document.querySelector('#mensaje button').style.backgroundColor = 'rgba(3,12,99,1)';
+						  document.querySelector('#mensaje button:last-child').style.backgroundColor = 'rgba(3,12,99,1)';
+
+
+						  var divMenu = document.querySelector('#menu');
+						  divMenu.style.backgroundColor = 'rgba(3,12,99,1)';
+						  divMenu.style.color = 'white';
+						  document.querySelector('#contenedor>button:first-of-type').style.backgroundImage = 'radial-gradient(circle at center center,#83C2F8 0%, #83C2F8 20%, rgba(3,12,99,1) 85%, rgba(3,12,99,1) 100%)';
+						  document.querySelector('#contenedor>button:nth-of-type(2)').style.backgroundImage = 'radial-gradient(circle at center center,#83C2F8 0%, #83C2F8 20%, rgba(3,12,99,1) 85%, rgba(3,12,99,1) 100%)';
+						  document.querySelector('#ponerMarcador').style.borderColor = 'rgba(3,12,99,1)';
+						  var botonCerrar = document.querySelector('#envolturaMapa button');
+						  botonCerrar.style.backgroundColor = 'rgba(3,12,99,1)';
+						 document.querySelector('#envolturaMapa button:last-child').style.backgroundColor = 'rgba(3,12,99,1)';
+						 
+						  var divContenidoMapa = document.querySelector('#contenidoMapa');
+						  divContenidoMapa.style.borderColor = 'rgba(3,12,99,1)';
+
+						
+						  /*document.querySelector('.iconito').style.backgroundColor = 'rgba(3,12,99,1)';*/
+
+						  break;
+			case 'Verde' : document.querySelector('body').style.backgroundColor = 'rgba(171,208,51,1)';
+						  document.querySelector('#mensaje').style.borderColor = 'rgba(171,208,51,1)';
+						  document.querySelector('#mensaje button').style.backgroundColor = 'rgba(171,208,51,1)';
+						  document.querySelector('#mensaje button:last-child').style.backgroundColor = 'rgba(171,208,51,1)';
+						  var divMenu = document.querySelector('#menu');
+						  divMenu.style.backgroundColor = 'rgba(171,208,51,1)';
+						  divMenu.style.color = 'black';
+						  document.querySelector('#contenedor>button:first-of-type').style.backgroundImage = 'radial-gradient(circle at center center,#d6eb90 0%, #d6eb90 20%, rgba(171,208,51,1) 85%, rgba(171,208,51,1) 100%)';
+						  document.querySelector('#contenedor>button:first-of-type').style.color ='black';
+						  document.querySelector('#contenedor>button:nth-of-type(2)').style.backgroundImage = 'radial-gradient(circle at center center,#d6eb90 0%, #d6eb90 20%, rgba(171,208,51,1) 85%, rgba(171,208,51,1) 100%)';
+						  document.querySelector('#contenedor>button:nth-of-type(2)').style.color='black';
+						  document.querySelector('#ponerMarcador').style.borderColor = 'rgba(171,208,51,1)';
+						  var botonCerrar = document.querySelector('#envolturaMapa button');
+						  botonCerrar.style.backgroundColor = 'rgba(171,208,51,1)';
+						 
+						  document.querySelector('#envolturaMapa button:last-child').style.backgroundColor = 'rgba(171,208,51,1)';
+						  var divContenidoMapa = document.querySelector('#contenidoMapa');
+						  divContenidoMapa.style.borderColor = 'rgba(171,208,51,1)';
+
+						 
+						  /*document.querySelector('.iconito').style.backgroundColor = 'rgba(3,12,99,1)';*/
+
+						  break;
+
+			case 'Rojo' : document.querySelector('body').style.backgroundColor = 'rgba(198,36,62,1)';
+						  document.querySelector('#mensaje').style.borderColor = 'rgba(198,36,62,1)';
+						  document.querySelector('#mensaje button').style.backgroundColor = 'rgba(198,36,62,1)';
+						  document.querySelector('#mensaje button:last-child').style.backgroundColor = 'rgba(198,36,62,1)';
+						  var divMenu = document.querySelector('#menu');
+						  divMenu.style.backgroundColor = 'rgba(198,36,62,1)';
+						  divMenu.style.color = 'black';
+						  document.querySelector('#contenedor>button:first-of-type').style.backgroundImage = 'radial-gradient(circle at center center,#f694a4 0%, #f694a4 20%, rgba(198,36,62,1) 85%, rgba(198,36,62,1) 100%)';
+						  document.querySelector('#contenedor>button:first-of-type').style.color ='black';
+						  document.querySelector('#contenedor>button:nth-of-type(2)').style.backgroundImage = 'radial-gradient(circle at center center,#f694a4 0%, #f694a4 20%, rgba(198,36,62,1) 85%, rgba(198,36,62,1) 100%)';
+						  document.querySelector('#contenedor>button:nth-of-type(2)').style.color='black';
+						  document.querySelector('#ponerMarcador').style.borderColor = 'rgba(198,36,62,1)';
+						  var botonCerrar = document.querySelector('#envolturaMapa button');
+						  botonCerrar.style.backgroundColor = 'rgba(198,36,62,1)';
+						
+						  document.querySelector('#envolturaMapa button:last-child').style.backgroundColor = 'rgba(198,36,62,1)';
+						  var divContenidoMapa = document.querySelector('#contenidoMapa');
+						  divContenidoMapa.style.borderColor = 'rgba(198,36,62,1)';
+
+						
+						  /*document.querySelector('.iconito').style.backgroundColor = 'rgba(3,12,99,1)';*/
+
+						  break;
+		}
+
+		localStorage.colorTema = elemento;
+
+		var divMenu = document.querySelector('#menu');
+		if (divMenu.style.right=='0px'){
+			divMenu.style.right='-' + (anchuraPantalla + 20)+ 'px';
+			console.log(divMenu.style.right);		
+		} 
 
 }
 
