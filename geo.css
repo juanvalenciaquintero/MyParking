@@ -93,6 +93,54 @@ body {
 
 }
 
+
+#ruta {
+	position:absolute;
+	width:150px;
+	height:100px;
+	top:200px;
+	border:5px solid rgba(3,12,99,1);
+	border-radius:15px;
+	display:none;
+	flex-direction: column;
+	justify-content: space-around;
+	align-items: flex-end;
+	background-color: white;
+	padding:5px;
+	font-family:'francois', verdana,sans-serif;
+	z-index:160;
+	
+}
+
+#ruta span {
+	text-align:center;
+}
+
+#ruta div {
+	width:100%;
+	display:flex;	
+	justify-content: space-around;
+	align-items: center;
+}
+
+#ruta button {
+	
+	width:100px;
+	height:30px;
+	border-radius: 10px;
+	background-color:rgba(3,12,99,1);
+	color:white;
+	font-weight: bold;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	margin-bottom:15px;
+
+}
+
+
+
+
 #menu {
 	
 	position:absolute;
@@ -368,6 +416,10 @@ body {
 		top:180px;
 	}
 
+	#ruta {
+		top:300px;
+	}
+
 
 }
 
@@ -416,6 +468,10 @@ body {
 		height:50px;		
 		font-size:1.2em;
 		
+	}
+
+	#ruta {
+		top:450px;
 	}
 
 

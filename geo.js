@@ -125,8 +125,8 @@ window.onload = function() {
 					alert('No hay ningún coche aparcado');
 				} else {
 					puntoAmostrar= JSON.parse(localStorage.aparcamiento);
-					console.log(typeof(localStorage.aparcamiento));
-					mostrar('Mi coche',puntoAmostrar);
+					
+					encontrar();
 				};
 
 				}, false);
@@ -137,7 +137,7 @@ window.onload = function() {
 					alert('No hay ningún coche aparcado');
 				} else {
 					puntoAmostrar= JSON.parse(localStorage.aparcamiento);
-					console.log(typeof(localStorage.aparcamiento));
+					
 					mostrar('Mi coche',puntoAmostrar);
 				};
 
@@ -157,6 +157,13 @@ window.onload = function() {
 
 		var botonCancelarMarcador = document.querySelector('#ponerMarcador button:last-child').addEventListener('click', cerrarMarcador,false);
 
+		var botonAceptarRuta = document.querySelector('#ruta>div>button:first-child').addEventListener('click', function() {
+				document.querySelector('#ruta').style.display='none';
+				
+				encontrarRutaAmiSitio();
+
+		}, false);
+
 		
 		var arrayOpciones2 = document.querySelectorAll('#subSubmenu2>li>span');
 	
@@ -170,8 +177,6 @@ window.onload = function() {
 		}
 
 		
-		//localStorage.misSitios="";
-		//arraySitiosGuardados="";
 		rellenarSubmenu();
 		
 
@@ -180,103 +185,12 @@ window.onload = function() {
 	}  // Fin de else 
 }
 
+
+//   Aparcar coche **************************   
+
 function aparcar() {
 
-		
-
 	navigator.geolocation.getCurrentPosition(faparcar, ferror, opciones);
-
-
-}
-
-function encontrar() {
-
-	 
-
-	navigator.geolocation.getCurrentPosition(fencontrar, ferror, opciones);
-
-	
-}
-
-function cerrar() {
-
-	var divEnvolturaMapa = document.querySelector('#envolturaMapa');
-
-	divEnvolturaMapa.style.display='none';
-
-}
-
-function borrar() {
-	
-
-	localStorage.aparcamiento = "";
-
-	var divEnvolturaMapa = document.querySelector('#envolturaMapa');
-
-	divEnvolturaMapa.style.display='none';
-
-}
-
-function cerrarMensaje() {
-	document.querySelector('#mensaje').style.display='none';
-}
-
-function mostrar() {
-
-	var divMenu = document.querySelector('#menu');
-	if (divMenu.style.right=='0px'){
-		divMenu.style.right='-' + (anchuraPantalla + 20)+ 'px';
-		console.log(divMenu.style.right);		
-	} 
-
-	document.querySelector('#mensaje').style.display='none';
-
-	var puntoAmostrar = JSON.parse(localStorage.aparcamiento);
-
-	console.log(puntoAmostrar.latitud);
-	console.log(puntoAmostrar.longitud);
-
-	var divEnvolturaMapa = document.querySelector('#envolturaMapa');
-
-	divEnvolturaMapa.style.display='flex';
-
-	var mapa = new GMaps({
-			el:'#contenidoMapa',
-			lat:puntoAmostrar.latitud,
-			lng:puntoAmostrar.longitud,
-			zoom:15,
-			click:function(e) {
-				
-				localStorage.puntoAgrabar = JSON.stringify(e);
-				console.log('Punto a grabar: ' + localStorage.puntoAgrabar);
-				console.log(e);
-				abrirVentanaGrabar(e);
-							
-			}
-
-		});
-
-		mapa.addMarker({
-			lat:puntoAmostrar.latitud,
-			lng:puntoAmostrar.longitud,
-			title:"Coche aparcado",			
-			infoWindow :{
-				content:'<span>Mi aparcamiento</span>'
-			},
-			
-			
-		});
-
-		mapa.drawOverlay({
-			lat:puntoAmostrar.latitud, 
-			lng:puntoAmostrar.longitud,
-			content:"<div class='iconito'>Mi aparcamiento</div>",
-			verticalAlign:'bottom',
-			horizontalAlign:'right'
-		})
-
-	
-
 
 }
 
@@ -284,15 +198,18 @@ function faparcar(sitio) {
 
 
 	
-	posicionAparcamiento.latitud = sitio.coords.latitude+0.025;
-	posicionAparcamiento.longitud= sitio.coords.longitude-0.03;
+	posicionAparcamiento.latitud = sitio.coords.latitude;
+	posicionAparcamiento.longitud= sitio.coords.longitude;
 
-	var cocheAparcado = JSON.stringify(posicionAparcamiento);
+	//var cocheAparcado = JSON.stringify(posicionAparcamiento);
+
+		var cocheAparcado = JSON.stringify(posicionAparcamiento);
+		console.log('Coche aparcado: ' + cocheAparcado);
 
 	var divMenu = document.querySelector('#menu');
 	if (divMenu.style.right=='0px'){
 		divMenu.style.right='-' + (anchuraPantalla + 20)+ 'px';
-		console.log(divMenu.style.right);		
+			
 	} 
 
 	var divEnvolturaMapa = document.querySelector('#envolturaMapa');
@@ -309,12 +226,24 @@ function faparcar(sitio) {
 	
 }
 
+
+//******************************    Encontrar el coche *****************
+
+
+function encontrar() {
+
+	navigator.geolocation.getCurrentPosition(fencontrar, ferror, opciones);
+	
+}
+
 function fencontrar(sitio) {
+
+	console.log('Sitio' + sitio);
 
 	var divMenu = document.querySelector('#menu');
 	if (divMenu.style.right=='0px'){
 		divMenu.style.right='-' + (anchuraPantalla + 20)+ 'px';
-		console.log(divMenu.style.right);		
+			
 	} 
 
 	posicionActual.latitud = sitio.coords.latitude;
@@ -386,16 +315,204 @@ function fencontrar(sitio) {
 
 }
 
+
+
+//************    Encontrar ruta a sitio guardado ****************************************
+
+function encontrarRutaAmiSitio() {
+	navigator.geolocation.getCurrentPosition(fencontrarMiSitio, ferror, opciones);
+
+}
+
+
+function fencontrarMiSitio(sitio) {
+
+	
+
+	var divMenu = document.querySelector('#menu');
+	if (divMenu.style.right=='0px'){
+		divMenu.style.right='-' + (anchuraPantalla + 20)+ 'px';
+		console.log(divMenu.style.right);		
+	} 
+
+	posicionActual.latitud = sitio.coords.latitude;
+	posicionActual.longitud= sitio.coords.longitude;
+
+	posicionMiSitio = JSON.parse(localStorage.miSitioAmostrar);
+
+	var texto = localStorage.TextoSitioAmostrar;
+
+	var divEnvolturaMapa = document.querySelector('#envolturaMapa');
+
+	divEnvolturaMapa.style.display='flex';
+
+	var mapa = new GMaps({
+			el:'#contenidoMapa',
+			lat:posicionActual.latitud,
+			lng:posicionActual.longitud,
+			zoom:15,
+			
+
+		});
+
+		mapa.addMarker({
+			lat:posicionActual.latitud,
+			lng:posicionActual.longitud,
+			title:"Mi posición",
+			infoWindow :{
+				content:'<span>Estoy aquí</span>'
+			},
+			
+		});
+
+		mapa.drawOverlay({
+			lat:posicionActual.latitud, 
+			lng:posicionActual.longitud,
+			content:"<div class='iconito'>Estoy aquí</div>",
+			verticalAlign:'bottom',
+			horizontalAlign:'right'
+		});
+
+		mapa.addMarker({
+			lat:posicionMiSitio.latLng.lat,
+			lng:posicionMiSitio.latLng.lng,
+			title:texto,
+			infoWindow :{
+				content:'<span>' + texto + '</span>'
+			},
+			
+		});
+
+		mapa.drawOverlay({
+			lat:posicionMiSitio.latLng.lat,
+			lng:posicionMiSitio.latLng.lng,
+			content:"<div class='iconito'>" + texto + "</div>",
+			verticalAlign:'bottom',
+			horizontalAlign:'right'
+		})
+
+		mapa.drawRoute({
+			origin:[posicionActual.latitud, posicionActual.longitud],
+			destination:[posicionMiSitio.latLng.lat,posicionMiSitio.latLng.lng],
+			travelMode:'walking',
+			strokeColor: '#030C63',
+			strokeOpacity: 0.6,
+			strokeWeight: 4		
+			 
+			
+		})
+
+
+
+}
+
+
+//*************   Cerrar mapa  **********************
+
+
+function cerrar() {
+
+	var divEnvolturaMapa = document.querySelector('#envolturaMapa');
+
+	divEnvolturaMapa.style.display='none';
+
+}
+
+
+//*****************   Borrar aparcamiento guardado
+
+function borrar() {
+	
+
+	localStorage.aparcamiento = "";
+
+	var divEnvolturaMapa = document.querySelector('#envolturaMapa');
+
+	divEnvolturaMapa.style.display='none';
+
+}
+
+
+//************    Cerrar ventana de mensaje 
+
+function cerrarMensaje() {
+	document.querySelector('#mensaje').style.display='none';
+}
+
+
+//*****  Mostrar posicion de coche aparcado
+
+function mostrar() {
+
+	var divMenu = document.querySelector('#menu');
+	if (divMenu.style.right=='0px'){
+		divMenu.style.right='-' + (anchuraPantalla + 20)+ 'px';
+			
+	} 
+
+	document.querySelector('#mensaje').style.display='none';
+
+	var puntoAmostrar = JSON.parse(localStorage.aparcamiento);
+
+
+	var divEnvolturaMapa = document.querySelector('#envolturaMapa');
+
+	divEnvolturaMapa.style.display='flex';
+
+	var mapa = new GMaps({
+			el:'#contenidoMapa',
+			lat:puntoAmostrar.latitud,
+			lng:puntoAmostrar.longitud,
+			zoom:15,
+			click:function(e) {
+				
+				localStorage.puntoAgrabar = JSON.stringify(e);
+			
+				abrirVentanaGrabar(e);
+							
+			}
+
+		});
+
+		mapa.addMarker({
+			lat:puntoAmostrar.latitud,
+			lng:puntoAmostrar.longitud,
+			title:"Coche aparcado",			
+			infoWindow :{
+				content:'<span>Mi aparcamiento</span>'
+			},
+			
+			
+		});
+
+		mapa.drawOverlay({
+			lat:puntoAmostrar.latitud, 
+			lng:puntoAmostrar.longitud,
+			content:"<div class='iconito'>Mi aparcamiento</div>",
+			verticalAlign:'bottom',
+			horizontalAlign:'right'
+		})
+
+	
+
+
+}
+
+
+
+
+
+
+
+// ***************    Rellenar submenu de mis sitios
+
+
 function rellenarSubmenu() {
 
 	if ((typeof(localStorage.misSitios)!='undefined') && (localStorage.misSitios!="")) {
 		arraySitiosGuardados=JSON.parse(localStorage.misSitios);
-		console.log('Array: ' + arraySitiosGuardados);
-		console.log('Mis sitios: ' + localStorage.misSitios);
-		console.log(JSON.parse(localStorage.misSitios));
 		
-		
-		console.log(arraySitiosGuardados);
+	
 
 		var texto = new Array;
 	
@@ -407,7 +524,7 @@ function rellenarSubmenu() {
 			for (i in arraySitiosGuardados[j]){
 
 				texto= Object.keys(arraySitiosGuardados[j][i]);
-				console.log('i='+i+', Nombre sitio: ' + texto);
+			
 				submenu1.innerHTML = submenu1.innerHTML + '<li><span>'+i+'</span></li>';
 
 
@@ -426,26 +543,31 @@ function rellenarSubmenu() {
 				
 					if (arraySitiosGuardados[k][elementoPulsado]) {
 						
+						localStorage.miSitioAmostrar = JSON.stringify(arraySitiosGuardados[k][elementoPulsado]);
+						localStorage.TextoSitioAmostrar = elementoPulsado;
+						mostrarPunto(elementoPulsado,arraySitiosGuardados[k][elementoPulsado]);						
 						
-						mostrarPunto(elementoPulsado,arraySitiosGuardados[k][elementoPulsado]);
+						document.querySelector('#ruta').style.display='flex';
+
 					} 
 				}
 				
 			},false);
 		}
 	}
-
-	
-	
 	
 	
 }
 
+
+//******    Cerrar ventana de grabar marcador 
 function cerrarMarcador() {
 	var ventanaNuevoMarcador = document.querySelector('#ponerMarcador');
 	ventanaNuevoMarcador.style.display='none';
 }
 
+
+//*****   Abrir ventana de grabar marcador
 function abrirVentanaGrabar(objeto) {
 	var ventanaNuevoMarcador = document.querySelector('#ponerMarcador');
 	ventanaNuevoMarcador.style.display='flex';
@@ -453,7 +575,11 @@ function abrirVentanaGrabar(objeto) {
 	localStorage.puntoAgrabar = JSON.stringify(objeto);
 }
 
+
+ //*    Grabar sitio  nuevo
+
 function grabarMarcador(objeto) {
+
 	
 	var texto = document.querySelector('#ponerMarcador input').value;
 	
@@ -489,24 +615,17 @@ function grabarMarcador(objeto) {
 
 	
 
-	
-
-
-	console.log('Nuevo punto: ' + JSON.stringify(nuevoPunto));
 
 	var textoAgrabar="";
-	console.log('Longitud array: ' + arraySitiosGuardados.length);
-
+	
 	
 	textoAgrabar = '{"' + texto + '":' + JSON.stringify(nuevoPunto) + '}';
 
-	
-	console.log('LocalStorage grabado: ' + localStorage.misSitios);
 
 	arraySitiosGuardados.push(JSON.parse(textoAgrabar));
 	localStorage.misSitios = JSON.stringify(arraySitiosGuardados);
 
-	console.log(localStorage.misSitios);
+	
 	var ventanaNuevoMarcador = document.querySelector('#ponerMarcador');
 	ventanaNuevoMarcador.style.display='none';
 
@@ -517,6 +636,9 @@ function grabarMarcador(objeto) {
 }
 
 
+
+//**********   Mostrar punto guardado
+
 function mostrarPunto(titulo,punto) {
 var divMenu = document.querySelector('#menu');
 	if (divMenu.style.right=='0px'){
@@ -525,25 +647,32 @@ var divMenu = document.querySelector('#menu');
 	} 
 
 	document.querySelector('#mensaje').style.display='none';
-	console.log(punto);
+	
 	var puntoAmostrar = punto;
-	console.log(puntoAmostrar);
+	
 	var divEnvolturaMapa = document.querySelector('#envolturaMapa');
 
 	divEnvolturaMapa.style.display='flex';
 
 	var mapa = new GMaps({
 			el:'#contenidoMapa',
-			lat:punto.latLng.lat,
-			lng:punto.latLng.lng,
-			zoom:15
+			lat:puntoAmostrar.latLng.lat,
+			lng:puntoAmostrar.latLng.lng,
+			zoom:15,
+			click:function(e) {
+				
+				localStorage.puntoAgrabar = JSON.stringify(e);
+				
+				abrirVentanaGrabar(e);
+							
+			}
 			
 
 		});
 
 		mapa.addMarker({
-			lat:punto.latLng.lat,
-			lng:punto.latLng.lng,
+			lat:puntoAmostrar.latLng.lat,
+			lng:puntoAmostrar.latLng.lng,
 			title:titulo,			
 			infoWindow :{
 				content:titulo
@@ -555,17 +684,48 @@ var divMenu = document.querySelector('#menu');
 		var contenido = "<div class='iconito'>" + titulo + "</div>" ;
 
 		mapa.drawOverlay({
-			lat:punto.latLng.lat,
-			lng:punto.latLng.lng,
+			lat:puntoAmostrar.latLng.lat,
+			lng:puntoAmostrar.latLng.lng,
 			content:contenido,
 			verticalAlign:'bottom',
 			horizontalAlign:'right'
+		});
+
+		mapa.setContextMenu({
+			control:'map',    //  o  'marker' 
+			options: [
+				{
+					title:'Ruta hasta aquí', 
+					name:'add_marker',
+					action: function(e) {
+						this.addMarker({
+							lat:e.latLng.lat(),
+							lng:e.latLng.lng(),
+							titulo:'nueva marca'
+						})
+					}
+				},   // Fin primera entrada
+				{ title:'Centrar Mapa', 
+					name:'center_here',
+					action: function(e) {
+						this.setCenter(e.latLng.lat(),e.latLng.lng())
+							
+					}
+						
+
+				}  //  Fin de segunda entrada
+			]  //  fin option
+
+
 		})
 
-	
+
 
 
 }
+
+
+//***************   Cambiar colores de la aplicacion
 
 
 function cambiarTema(elemento) {
