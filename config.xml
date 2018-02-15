@@ -6,6 +6,8 @@
         Juan Valencia  </author>
     <content src="index.html" />
     <access origin="*" />
+    <plugin name="cordova-plugin-geolocation" spec="~4.0.1" />
+    <plugin name="cordova-plugin-splashscreen" spec="~5.0.2" />
     <icon src="parking-2-600x600.png" platform="android" />
     <splash src="splash.png" platform="android" />
 </widget>
